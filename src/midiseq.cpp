@@ -13,7 +13,8 @@ int sensor_min = 1000;  // minimum sensor value
 int sensor_max = 100;   // maximum sensor value
 int output_min = 0;
 int output_max = 127;
-unsigned int current_mux_state = 0;
+unsigned int mux1_state = 0;
+unsigned int mux2_state = 0;
 
 // functions
 void init_pins();
@@ -92,37 +93,31 @@ void print_in_pin_vals()
 
 void scan_mux()
 {
-  int cur_bit;
+  int mux1_cur_bit,mux2_cur_bit;
+  mux1_state = 0;
+  mux2_state = 0;
   for(int i=0; i<8; i++)
   {
-    // select multiplexer channel
-    // shift required bit i places along to LSB position and use bitwise and  to identify it's value
+    // shift required bit i places right to LSB position and use bitwise and to identify it's value
     digitalWrite(mux_select_pins[0], i & 0x1);
     digitalWrite(mux_select_pins[1], (i>>1) & 0x1);
     digitalWrite(mux_select_pins[2], (i>>2) & 0x1);
-    cur_bit = digitalRead(digital_ins[0]);
-    current_mux_state = current_mux_state << cur_bit;
-    
-    Serial.print(digitalRead(cur_bit));
+    mux1_cur_bit = digitalRead(digital_ins[0]);
+    mux2_cur_bit = digitalRead(digital_ins[1]);
+    mux1_state = (mux1_state<<1) | mux1_cur_bit;
+    mux2_state = (mux2_state<<1) | mux2_cur_bit;
   }
   
-  for(int i=0; i<8; i++)
-  {
-    // select multiplexer channel
-    digitalWrite(mux_select_pins[0], i & 0x1);
-    digitalWrite(mux_select_pins[1], (i>>1) & 0x1);
-    digitalWrite(mux_select_pins[2], (i>>2) & 0x1);
-    cur_bit = digitalRead(digital_ins[1]);
-    current_mux_state = current_mux_state << cur_bit;
+  Serial.print(mux1_state,BIN);
 
-    Serial.print(digitalRead(cur_bit));
-  }
-  Serial.print("\n\n");
-  //Serial.println(current_mux_state);
+  Serial.print(" / ");
+  Serial.print(mux2_state,BIN);
+
+  Serial.print("\n");
+
 }
 
 
-// the loop routine runs over and over again forever:
 void loop()
 {
   scan_mux();
