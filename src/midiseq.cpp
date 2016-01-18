@@ -1,5 +1,5 @@
-
 #include "Arduino.h"
+#include <stdio.h>
 
 //constants
 const int sensor_pin = A3;
@@ -21,6 +21,8 @@ void init_pins();
 void print_in_pin_vals(); 
 void calibrate();
 void scan_mux();
+void init_interrupts_uno();
+void init_interrupts_energia();
 
 // the setup routine runs once when you press reset:
 void setup() 
@@ -32,7 +34,62 @@ void setup()
   //calibrate();
 
   //print_in_pin_vals();
+  
+  #ifdef ARDUINO_AVR_UNO 
+    init_interrupts_uno();
+  #elif ENERGIA 
+    init_interrupts_energia();
+  #endif
+
 }
+
+/********************ARDUINO-SPECIFIC*****************/
+#ifdef ARDUINO_AVR_UNO
+void init_interrupts_uno()
+{
+  // initialize Timer1
+  cli();          // disable global interrupts
+  TCCR1A = 0;     // set entire TCCR1A register to 0
+  TCCR1B = 0;     // same for TCCR1B
+
+  // set compare match register to desired timer count (100ms):
+  OCR1A = 156.15;
+  // turn on CTC mode:
+  TCCR1B |= (1 << WGM12);
+  // Set CS10 and CS12 bits for 1024 prescaler:
+  TCCR1B |= (1 << CS10);
+  TCCR1B |= (1 << CS12);
+  // enable timer compare interrupt:
+  TIMSK1 |= (1 << OCIE1A);
+  sei();          // enable global interrupts
+}
+
+ISR(TIMER1_COMPA_vect)
+{
+  scan_mux();
+}
+#endif
+/*******************END OF ARDUINO-SPECIFIC***********/
+
+
+/*******************MSP430-SPECIFIC*******************/
+#ifdef ENERGIA
+void init_interrupts_energia()
+{
+  TACCTL0 |= CCIE;	//Enable Interrupts on Timer
+  TACCR0 = 500;	//Number of cycles in the timer
+  TACTL |= TASSEL_1;	//Use ACLK as source for timer
+  TACTL |= MC_1;	//Use UP mode timer
+  __enable_interrupt(); //Set GIE in SR
+}
+
+#pragma vector = TIMER0_A0_VECTOR
+__interrupt void myTimerISR(void)
+{
+  scan_mux();
+}
+#endif
+/******************END OF MSP430-SPECIFIC*************/
 
 void calibrate()
 {
@@ -107,21 +164,20 @@ void scan_mux()
     mux1_state = (mux1_state<<1) | mux1_cur_bit;
     mux2_state = (mux2_state<<1) | mux2_cur_bit;
   }
-  
+
+#ifdef DEBUG_MODE  
   Serial.print(mux1_state,BIN);
 
   Serial.print(" / ");
   Serial.print(mux2_state,BIN);
 
   Serial.print("\n");
-
+#endif
 }
 
 
 void loop()
 {
-  scan_mux();
-
 /*
   // read the input on analog pin Ax
   int sensor_value = analogRead(sensor_pin);
