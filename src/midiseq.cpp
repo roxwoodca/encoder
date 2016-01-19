@@ -1,25 +1,12 @@
 #include "Arduino.h"
 #include <stdio.h>
-
-//constants
-const int sensor_pin = A3;
-const int digital_ins[] = { 12,13 };
-const int num_digital_ins = 2;
-const int mux_select_pins[] = { 9,10,11 }; // routed to 11,10,9 (A,B,C) binary control inputs on 4051 where A is the LSB
+#include "mcuio.h"
 
 // variables:
-int sensor_value = 0;   // the sensor value
-int sensor_min = 1000;  // minimum sensor value
-int sensor_max = 100;   // maximum sensor value
-int output_min = 0;
-int output_max = 127;
 unsigned int mux1_state = 0;
 unsigned int mux2_state = 0;
 
 // functions
-void init_pins();
-void print_in_pin_vals(); 
-void calibrate();
 void scan_mux();
 void init_interrupts_uno();
 void init_interrupts_energia();
@@ -27,9 +14,15 @@ void init_interrupts_energia();
 // the setup routine runs once when you press reset:
 void setup() 
 {
-  init_pins();
+  digital_ins = { { 12, 0 }, { 13, 0 } };
+  digital_outs = { { 9, 0 }, { 10, 0 }, { 11, 0} };
+  analog_ins = { { A3, 127, 1000, 100, 0, 127, 0 } };
   
+  setup_pins()
+
+  #ifdef DEBUG_MODE 
   Serial.begin(9600);
+  #endif
 
   //calibrate();
 
@@ -91,61 +84,47 @@ __interrupt void myTimerISR(void)
 #endif
 /******************END OF MSP430-SPECIFIC*************/
 
-void calibrate()
+void calibrate_analog_ins()
 {
+  
   // turn on LED to signal the start of the calibration period:
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
+  
+  #ifdef DEBUG_MODE
+  Serial.println("Calibrating. Please sweep all analog controls...");
+  #endif
 
-  Serial.println("Please place finger on LDR briefly to calibrate...");
+  int i = 0;
+  int sensor_value;
 
   // calibrate during the first five seconds
-   
   while (millis() < 5000) 
   {
-    sensor_value = analogRead(sensor_pin);
-
-    // record the maximum sensor value
-    if (sensor_value > sensor_max)
+    for (i = 0; i < NUM_ANALOG_INS; i++)
     {
-      sensor_max = sensor_value;
-    }
+      sensor_value = analogRead(analog_ins[i].pin);
 
-    // record the minimum sensor value
-    if (sensor_value < sensor_min)
-    {
-      sensor_min = sensor_value;
+      // record the maximum sensor value
+      if (sensor_value > analog_ins[i].sensor_max)
+      {
+        analog_ins[i].sensor_max = sensor_value;
+      }
+
+      // record the minimum sensor value
+      if (sensor_value < analog_ins[i].sensor_min)
+      {
+        analog_ins[i].sensor_min = sensor_value;
+      }
     }
   }
 
   // signal the end of the calibration period
   digitalWrite(LED_BUILTIN, LOW);
 
-  // initialize serial communication at 9600 bits per second:
+  #ifdef DEBUG_MODE
   Serial.println("end of calibration...");
-}
-
-void init_pins()
-{
-  for (int this_pin = 0; this_pin < num_digital_ins; this_pin++) 
-  {
-    pinMode(digital_ins[this_pin], INPUT);
-  } 
-  
-  for (int this_pin = 0; this_pin < 3 ; this_pin++) 
-  {
-    pinMode(mux_select_pins[this_pin], OUTPUT);
-  } 
-    
-}
-
-void print_in_pin_vals()
-{
-  for (int this_pin = 0; this_pin < num_digital_ins; this_pin++)
-  {
-    Serial.println(digitalRead(digital_ins[this_pin]));
-  } 
- 
+  #endif
 }
 
 void scan_mux()
@@ -175,10 +154,9 @@ void scan_mux()
 #endif
 }
 
-
-void loop()
+void analogue_pin_read(sensor_pin,sensor_min,sensor_max)
 {
-/*
+
   // read the input on analog pin Ax
   int sensor_value = analogRead(sensor_pin);
 
@@ -187,12 +165,17 @@ void loop()
   // in case the sensor value is outside the range seen during calibration
   cali_value = constrain(cali_value, output_min, output_max);
 
+#ifdef DEBUG_MODE
   // print out the value you read:
   Serial.print(sensor_value);
   Serial.print(" : ");
   Serial.print(cali_value);
   Serial.print("\n"); 
+#endif
+}
 
-  delay(500); // delay in between reads for stability
-*/
+void loop()
+{
+  
+
 }
