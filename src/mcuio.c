@@ -31,10 +31,6 @@ void calibrate_analog_ins()
   digitalWrite(LED_BUILTIN, HIGH);
   #endif  
 
-  #ifdef DEBUG_MODE
-  Serial.println("Calibrating. Please sweep all analog controls...");
-  #endif
-
   int i = 0;
   int sensor_value;
 
@@ -63,8 +59,27 @@ void calibrate_analog_ins()
   // signal the end of the calibration period
   digitalWrite(LED_BUILTIN, LOW);
   #endif
+}
 
-  #ifdef DEBUG_MODE
-  Serial.println("end of calibration...");
-  #endif
+void scan_mux()
+{
+  int mux1_cur_bit,mux2_cur_bit;
+  mux1_state = 0;
+  mux2_state = 0;
+  for(int i=0; i<8; i++)
+  {
+    // shift required bit i places right to LSB position and use bitwise and to identify it's value
+    digitalWrite(mux_select_pins[0], i & 0x1);
+    digitalWrite(mux_select_pins[1], (i>>1) & 0x1);
+    digitalWrite(mux_select_pins[2], (i>>2) & 0x1);
+    mux1_cur_bit = digitalRead(digital_ins[0]);
+    mux2_cur_bit = digitalRead(digital_ins[1]);
+    mux1_state = (mux1_state<<1) | mux1_cur_bit;
+    mux2_state = (mux2_state<<1) | mux2_cur_bit;
+  }
+
+#ifdef DEBUG_MODE  
+  log_debug("mux1_state",mux1_state);
+  log_debug("mux2_state",mux2_state);
+#endif
 }
