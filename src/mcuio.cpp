@@ -1,6 +1,3 @@
-#include "debug.h"
-#include "mcuio.h"
-
 void init_pins()
 {
   int i;
@@ -118,8 +115,9 @@ void read_analog_in(index)
 
   // store the new value;
   analog_ins[index].value = cali_value;
-#ifdef DEBUG_MODE
+
+  #ifdef DEBUG_MODE
   log_debug("sensor_value",sensor_value)
-  log_debug("cali_value",cali_value")
-#endif
+  log_debug("cali_value",cali_value)
+  #endif
 }
