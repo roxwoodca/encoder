@@ -1,3 +1,7 @@
+#include "Arduino.h"
+#include <stdio.h>
+#include "debug.h"
+#include "mcuio.h"
 
 /********************ARDUINO*INTERRUPTS*****************/
 #ifdef ARDUINO_AVR_UNO
