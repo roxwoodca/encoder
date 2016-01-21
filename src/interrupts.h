@@ -1,10 +1,9 @@
-#include "Arduino.h"
-#include <stdio.h>
-#include "debug.h"
-#include "mcuio.h"
+void isr_1();
 
 /********************ARDUINO*INTERRUPTS*****************/
 #ifdef ARDUINO_AVR_UNO
+void init_interrupts_uno();
+
 void init_interrupts_uno()
 {
   // initialize Timer1
@@ -33,6 +32,8 @@ ISR(TIMER1_COMPA_vect)
 
 
 /*******************MSP430*INTERRUPTS*******************/
+void init_interrupts_energia();
+
 #ifdef ENERGIA
 void init_interrupts_energia()
 {
