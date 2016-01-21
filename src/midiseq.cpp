@@ -7,7 +7,7 @@ digital_in digital_ins[] = { { 12, 0 }, { 13, 0 } };
 digital_out   digital_outs[] = { { 9, 0 }, { 10, 0 }, { 11, 0} };
 analog_in analog_ins[] = { { A3, 127, 1000, 100, 0, 127, 0 } };
 analog_out analog_outs[] = {};
-digital_mux digital_mux_1 = { 8, { { 9, 0 }, {10, 0}, { 11, 0 } }, { { 12, 0 }, { 13, 0 } }, { 0, 0 } };
+digital_mux digital_mux_1 = { 8, { 9, 10, 11 }, { 12, 13 }, { 0, 0 } };
 
 
 // the setup routine runs once when you press reset:
@@ -116,12 +116,12 @@ void scan_mux()
   int mux1_cur_bit,mux2_cur_bit;
 
   // set the mux values to zero or else we get some crazy shit happening
-  digital_mux_1.values[0] = 0;
-  digital_mux_1.values[1] = 0;  
+  digital_mux_1.value[0] = 0;
+  digital_mux_1.value[1] = 0;  
 
   unsigned int i;
   // loop through 
-  for(i=0; i< digital_mux_1.num_channels; i++)
+  for(i=0; i < digital_mux_1.num_channels; i++)
   {
     // shift required bit i places right to LSB position and use bitwise and to identify it's value
     digitalWrite(digital_mux_1.channel_selector[0], i & 0x1);
@@ -129,18 +129,18 @@ void scan_mux()
     digitalWrite(digital_mux_1.channel_selector[2], (i>>2) & 0x1);
     mux1_cur_bit = digitalRead(digital_mux_1.mux_out[0]);
     mux2_cur_bit = digitalRead(digital_mux_1.mux_out[1]);
-    digital_mux_1.values[0] = (digital_mux_1.values[0]<<1) | mux1_cur_bit;
-    digital_mux_1.values[1] = (digtial_mux_1.values[1]<<1) | mux2_cur_bit;
+    digital_mux_1.value[0] = (digital_mux_1.value[0]<<1) | mux1_cur_bit;
+    digital_mux_1.value[1] = (digital_mux_1.value[1]<<1) | mux2_cur_bit;
   }
 
 #ifdef DEBUG_MODE  
-  log_debug("mux_1_value1",digital_mux_1.values[0]);
-  log_debug("mux_1_value2",digital_mux_1.values[1]);
+  log_debug("mux_1_value1",digital_mux_1.value[0]);
+  log_debug("mux_1_value2",digital_mux_1.value[1]);
 #endif
 }
 
 //read, recalibrate, and store the current value of an analog input  
-void read_analog_in(index)
+void read_analog_in(int index)
 {
   // read the input on analog pin Ax
   int sensor_value = analogRead(analog_ins[index].pin);

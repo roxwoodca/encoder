@@ -39,10 +39,10 @@ struct analog_out
 
 struct digital_mux
 {
-  int num_channels; 
-  digital_out channel_selector[3]; 
-  digital_in mux_outs[NUM_DIGITAL_MUX_OUTS]; 
-  int values[NUM_DIGITAL_MUX_OUTS];
+  unsigned int num_channels; 
+  unsigned int channel_selector[3]; 
+  unsigned int mux_out[NUM_DIGITAL_MUX_OUTS]; 
+  unsigned int value[NUM_DIGITAL_MUX_OUTS];
 };
 
 
