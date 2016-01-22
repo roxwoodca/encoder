@@ -51,4 +51,5 @@ void init_pins();
 void calibrate_analog_ins();
 void scan_mux();
 void read_analog_in(int);
+
 #endif /* MCUIO_H */

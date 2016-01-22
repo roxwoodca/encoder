@@ -1,10 +1,9 @@
 void isr_1();
 
-/********************ARDUINO*INTERRUPTS*****************/
 #ifdef ARDUINO_AVR_UNO
-void init_interrupts_uno();
+void init_interrupts_uno(float interval);
 
-void init_interrupts_uno()
+void init_interrupts_uno(float interval)
 {
   // initialize Timer1
   cli();          // disable global interrupts
@@ -12,7 +11,9 @@ void init_interrupts_uno()
   TCCR1B = 0;     // same for TCCR1B
 
   // set compare match register to desired timer count (100ms):
-  OCR1A = 156.15;
+  //OCR1A = 15624;
+  float resolution = 6.4E-5;
+  OCR1A = interval / resolution;
   // turn on CTC mode:
   TCCR1B |= (1 << WGM12);
   // Set CS10 and CS12 bits for 1024 prescaler:
@@ -28,14 +29,13 @@ ISR(TIMER1_COMPA_vect)
   isr_1();
 }
 #endif
-/*******************END OF ARDUINO-SPECIFIC***********/
 
 
-/*******************MSP430*INTERRUPTS*******************/
-void init_interrupts_energia();
 
 #ifdef ENERGIA
-void init_interrupts_energia()
+void init_interrupts_energia(float interval);
+
+void init_interrupts_energia(float interval)
 {
   TACCTL0 |= CCIE;	//Enable Interrupts on Timer
   TACCR0 = 500; 	//Number of cycles in the timer
@@ -50,4 +50,3 @@ __interrupt void myTimerISR(void)
   isr_1();
 }
 #endif
-/******************END OF MSP430-SPECIFIC*************/

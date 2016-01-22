@@ -11,7 +11,7 @@ struct debug
    int value;
 } debug_log[16];
 
-void log_debug(char message[], int value)
+void log_debug(const char* message, int value)
 {
     debug newdebug; 
     newdebug.time = millis();
