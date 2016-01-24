@@ -10,39 +10,38 @@
 // structs
 struct digital_in
 {
-  int pin;
-  int value;
+  char pin;
+  char value;
 };
 
 struct digital_out
 {
-  int pin;
-  int value;
+  char pin;
+  char value;
 };
 
 struct analog_in
 {
-  int pin;
-  int resolution;
+  unsigned char pin;
+  unsigned char resolution;
   int sensor_min;
   int sensor_max;
-  int output_min;
-  int output_max;
-  int value;
+  unsigned char output_max;
+  unsigned char value;
 };
 
 struct analog_out
 {
-  int pin;
-  int value;
+  unsigned char pin;
+  unsigned char value;
 };
 
 struct digital_mux
 {
-  unsigned int num_channels; 
-  unsigned int channel_selector[3]; 
-  unsigned int mux_out[NUM_DIGITAL_MUX_OUTS]; 
-  unsigned int value[NUM_DIGITAL_MUX_OUTS];
+  unsigned char num_channels; 
+  unsigned char channel_selector[3]; 
+  unsigned char mux_out[NUM_DIGITAL_MUX_OUTS]; 
+  unsigned char value[NUM_DIGITAL_MUX_OUTS];
 };
 
 

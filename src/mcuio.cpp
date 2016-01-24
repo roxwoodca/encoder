@@ -21,6 +21,7 @@ void init_pins()
   {
     pinMode(analog_outs[i].pin, OUTPUT);
   }
+
 }
 
 void calibrate_analog_ins()
@@ -91,11 +92,6 @@ void scan_mux()
     digital_mux_1.value[0] = (digital_mux_1.value[0]<<1) | mux1_cur_bit;
     digital_mux_1.value[1] = (digital_mux_1.value[1]<<1) | mux2_cur_bit;
   }
-
-#ifdef DEBUG_MODE  
-  log_debug("mux_1_value1",digital_mux_1.value[0]);
-  log_debug("mux_1_value2",digital_mux_1.value[1]);
-#endif
 }
 
 //read, recalibrate, and store the current value of an analog input  
@@ -108,17 +104,12 @@ void read_analog_in(int index)
   int cali_value = map(sensor_value,
                        analog_ins[index].sensor_min,
                        analog_ins[index].sensor_max,
-                       analog_ins[index].output_min,
+                       0,
                        analog_ins[index].output_max);
 
   // in case the sensor value is outside the range seen during calibration
-  cali_value = constrain(cali_value, analog_ins[index].output_min, analog_ins[index].output_max);
+  cali_value = constrain(cali_value, 0, analog_ins[index].output_max);
 
   // store the new value;
   analog_ins[index].value = cali_value;
-
-  #ifdef DEBUG_MODE
-  log_debug("sensor_value",sensor_value);
-  log_debug("cali_value",cali_value);
-  #endif
 }
