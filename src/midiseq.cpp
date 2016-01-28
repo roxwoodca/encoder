@@ -22,7 +22,6 @@ void setup()
 
   // set pin directions 
   init_pins();
-  //pinMode(LED_BUILTIN, OUTPUT);
 
   // user will need to sweep pots etc
   //calibrate_analog_ins();
