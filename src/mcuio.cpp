@@ -70,27 +70,27 @@ void calibrate_analog_ins()
  * This function steps through the channels of each mux (using the shared channel selector)
  * shifting each bit to the left to eventually read a full byte 
  */
-void scan_mux()
+void scan_mux(digital_mux *mux)
 {
   // some local variables to store individual bits
   int mux1_cur_bit,mux2_cur_bit;
 
   // set the mux values to zero or else we get some crazy shit happening
-  digital_mux_1.value[0] = 0;
-  digital_mux_1.value[1] = 0;  
+  mux->value[0] = 0;
+  mux->value[1] = 0;  
 
   unsigned int i;
   // loop through 
-  for(i=0; i < digital_mux_1.num_channels; i++)
+  for(i=0; i < mux->num_channels; i++)
   {
     // shift required bit i places right to LSB position and use bitwise and to identify it's value
-    digitalWrite(digital_mux_1.channel_selector[0], i & 0x1);
-    digitalWrite(digital_mux_1.channel_selector[1], (i>>1) & 0x1);
-    digitalWrite(digital_mux_1.channel_selector[2], (i>>2) & 0x1);
-    mux1_cur_bit = digitalRead(digital_mux_1.mux_out[0]);
-    mux2_cur_bit = digitalRead(digital_mux_1.mux_out[1]);
-    digital_mux_1.value[0] = (digital_mux_1.value[0]<<1) | mux1_cur_bit;
-    digital_mux_1.value[1] = (digital_mux_1.value[1]<<1) | mux2_cur_bit;
+    digitalWrite(mux->channel_selector[0], i & 0x1);
+    digitalWrite(mux->channel_selector[1], (i>>1) & 0x1);
+    digitalWrite(mux->channel_selector[2], (i>>2) & 0x1);
+    mux1_cur_bit = digitalRead(mux->mux_out[0]);
+    mux2_cur_bit = digitalRead(mux->mux_out[1]);
+    mux->value[0] = (mux->value[0]<<1) | mux1_cur_bit;
+    mux->value[1] = (mux->value[1]<<1) | mux2_cur_bit;
   }
 }
 
