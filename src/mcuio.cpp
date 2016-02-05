@@ -80,7 +80,7 @@ void scan_mux(digital_mux *mux)
   mux->value[1] = 0;  
 
   unsigned int i;
-  // loop through 
+  // loop through mux out channels in parallel 
   for(i=0; i < mux->num_channels; i++)
   {
     // shift required bit i places right to LSB position and use bitwise and to identify it's value
@@ -92,6 +92,13 @@ void scan_mux(digital_mux *mux)
     mux->value[0] = (mux->value[0]<<1) | mux1_cur_bit;
     mux->value[1] = (mux->value[1]<<1) | mux2_cur_bit;
   }
+}
+
+// so this will probably be a lot of bitwise stuff i suppose
+// we're going to be comparing encoder values in pairs to their previous value
+void process_encoder_data(struct digital_mux mux, struct rotary_encoder *encoder, char num_encoders, char set_index)
+{
+
 }
 
 //read, recalibrate, and store the current value of an analog input  

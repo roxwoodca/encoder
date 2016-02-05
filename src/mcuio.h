@@ -1,6 +1,7 @@
 #ifndef MCUIO_H
 #define MCUIO_H
 
+
 #define NUM_DIGITAL_INS (sizeof digital_ins / sizeof digital_ins[0])
 #define NUM_DIGITAL_OUTS (sizeof digital_outs / sizeof digital_outs[0])
 #define NUM_ANALOG_INS (sizeof analog_ins / sizeof analog_ins[0])
@@ -44,11 +45,17 @@ struct digital_mux
   volatile unsigned char value[NUM_DIGITAL_MUX_OUTS];
 };
 
+struct rotary_encoder
+{
+  char prev_val;
+  char cur_val;
+  char direction;
+};
 
 // function prototypes
 void init_pins();
 void calibrate_analog_ins();
 void scan_mux(digital_mux *mux);
 void read_analog_in(int);
-
+void process_encoder_data(struct digital_mux mux, struct rotary_encoder *encoder, char num_pairs, char set_index);
 #endif /* MCUIO_H */
