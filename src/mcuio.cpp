@@ -1,4 +1,5 @@
 #include "Arduino.h"
+#include "interrupts.h"
 #include "mcuio.h"
 #include "config.h"
 
@@ -6,7 +7,6 @@
 #include "debug.h"
 #endif
 
-#include "interrupts.h"
 
 // the setup routine runs once when you press reset:
 void setup() 
@@ -32,22 +32,24 @@ void setup()
 /* 2KHz */
 void isr_0()
 {
-  scan_mux(&encoder_mux);
-  //process_encoder_data(encoder_mux,tweakr,4,0);
+  //may as well scan the whole mux once for all controller objects
+  scan_mux(&twddle_mux);
+  process_encoder_data(&twddle_enc);
   //read_analog_in(0);
 }
 
 /* 1Hz */
 void isr_1()
 {
-  log_debug("mx1vl1",encoder_mux.value[0]);
-  log_debug("mx1vl2",encoder_mux.value[1]);
+  #ifdef DEBUG_MODE
+
+  //log_debug("mx1vl1",twddle_mux.value[0]);
+  //log_debug("mx1vl2",twddle_mux.value[1]);
   //log_debug("ana0val",analog_ins[0].value);
   
-  #ifdef DEBUG_MODE
   dump_debugs();
   #endif
-  //digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
 }
 
 void loop()
@@ -130,32 +132,39 @@ void calibrate_analog_ins()
 void scan_mux(digital_mux *mux)
 {
   // some local variables to store individual bits
-  int mux1_cur_bit,mux2_cur_bit;
+  int cur_bit;
 
-  // set the mux values to zero or else we get some crazy shit happening
-  mux->value[0] = 0;
-  mux->value[1] = 0;  
+  unsigned int i,j;
 
-  unsigned int i;
+  // zero out the mux values or else we get some crazy shit happening
+  for(j=0; j < mux->num_outs; j++)
+  {
+    mux->value[j] = 0;
+  }
+
   // loop through mux out channels in parallel 
   for(i=0; i < mux->num_channels; i++)
   {
     // shift required bit i places right to LSB position and use bitwise and to identify it's value
-    digitalWrite(mux->channel_selector[0], i & 0x1);
-    digitalWrite(mux->channel_selector[1], (i>>1) & 0x1);
-    digitalWrite(mux->channel_selector[2], (i>>2) & 0x1);
-    mux1_cur_bit = digitalRead(mux->mux_out[0]);
-    mux2_cur_bit = digitalRead(mux->mux_out[1]);
-    mux->value[0] = (mux->value[0]<<1) | mux1_cur_bit;
-    mux->value[1] = (mux->value[1]<<1) | mux2_cur_bit;
+    digitalWrite(mux->select_pin[0], i & 0x1);
+    digitalWrite(mux->select_pin[1], (i>>1) & 0x1);
+    digitalWrite(mux->select_pin[2], (i>>2) & 0x1);
+    
+    for(j=0; j < mux->num_outs; j++)
+    {
+      cur_bit = digitalRead(mux->mcu_input_pin[j]);
+      mux->value[j] = (mux->value[j]<<1) | cur_bit;
+    }
   }
 }
 
 // so this will probably be a lot of bitwise stuff i suppose
 // we're going to be comparing encoder values in pairs to their previous value
-void process_encoder_data(struct digital_mux mux, struct rotary_encoder *encoder, char num_encoders, char set_index)
+void process_encoder_data(encoder_set *enc_set)
 {
-
+  log_debug("twddle",enc_set->mux->value[enc_set->mcu_input_pin_index]);
+  //Serial.print(twddle_enc.num_encoders);
+  //Serial.print(twddle_enc.mcu_input_pin_index);
 }
 
 //read, recalibrate, and store the current value of an analog input  

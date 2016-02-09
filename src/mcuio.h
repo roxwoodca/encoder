@@ -5,7 +5,6 @@
 #define NUM_DIGITAL_OUTS (sizeof digital_outs / sizeof digital_outs[0])
 #define NUM_ANALOG_INS (sizeof analog_ins / sizeof analog_ins[0])
 #define NUM_ANALOG_OUTS (sizeof analog_outs / sizeof analog_outs[0])
-#define NUM_DIGITAL_MUX_OUTS 2
 
 // structs
 struct digital_in
@@ -36,19 +35,25 @@ struct analog_out
   unsigned char value;
 };
 
+// # of mux outputs is hardcoded to 2. need to find a way to make this flexible
+// without taking up unnecessary sdram
 struct digital_mux
 {
-  const unsigned char num_channels; 
-  const unsigned char channel_selector[3]; 
-  const unsigned char mux_out[NUM_DIGITAL_MUX_OUTS]; 
-  volatile unsigned char value[NUM_DIGITAL_MUX_OUTS];
+  unsigned char num_channels; 
+  unsigned char num_outs;
+  unsigned char select_pin[3]; 
+  unsigned char mcu_input_pin[2]; 
+  unsigned char value[2];
 };
 
-struct rotary_encoder
+// same issue as above for value[] and num_encoders
+struct encoder_set
 {
-  char prev_val;
-  char cur_val;
-  char direction;
+  struct digital_mux *mux;
+  unsigned char prev_word;
+  unsigned char value[8];
+  unsigned char mcu_input_pin_index;
+  unsigned char num_encoders;
 };
 
 // function prototypes
@@ -56,6 +61,6 @@ void init_pins();
 void calibrate_analog_ins();
 void scan_mux(digital_mux *mux);
 void read_analog_in(int);
-void process_encoder_data(struct digital_mux mux, struct rotary_encoder *encoder, char num_pairs, char set_index);
+void process_encoder_data(encoder_set *twddle_enc);
 
 #endif /* MCUIO_H */
