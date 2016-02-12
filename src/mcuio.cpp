@@ -43,10 +43,15 @@ void isr_1()
 {
   #ifdef DEBUG_MODE
 
-  //log_debug("mx1vl1",twddle_mux.value[0]);
-  //log_debug("mx1vl2",twddle_mux.value[1]);
+  //log_debug("mx1vl1",twddle_mux.value[0],2);
+  //log_debug("mx1vl2",twddle_mux.value[1],2);
   //log_debug("ana0val",analog_ins[0].value);
-  
+
+  log_debug("twddleA",twddle_enc.value[0]); 
+  log_debug("twddleB",twddle_enc.value[1]); 
+  log_debug("twddleC",twddle_enc.value[2]); 
+  log_debug("twddleD",twddle_enc.value[3]); 
+
   dump_debugs();
   #endif
   digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
@@ -149,7 +154,8 @@ void scan_mux(digital_mux *mux)
     digitalWrite(mux->select_pin[0], i & 0x1);
     digitalWrite(mux->select_pin[1], (i>>1) & 0x1);
     digitalWrite(mux->select_pin[2], (i>>2) & 0x1);
-    
+   
+    // each set of mux bits is stored in a byte
     for(j=0; j < mux->num_outs; j++)
     {
       cur_bit = digitalRead(mux->mcu_input_pin[j]);
@@ -162,10 +168,57 @@ void scan_mux(digital_mux *mux)
 // we're going to be comparing encoder values in pairs to their previous value
 void process_encoder_data(encoder_set *enc_set)
 {
-  log_debug("twddle",enc_set->mux->value[enc_set->mcu_input_pin_index]);
-  //Serial.print(twddle_enc.num_encoders);
-  //Serial.print(twddle_enc.mcu_input_pin_index);
+  // get current mux word
+  unsigned char cur_word = enc_set->mux->value[enc_set->mcu_input_pin_index]; 
+
+  // unsigned char cur_bit_a, cur_bit_b, prev_bit_a, prev_bit_b;
+
+  unsigned char prev_val, cur_val;
+
+  unsigned int i;
+
+  // log_debug("word",cur_word,BIN);
+
+  for(i=0; i < enc_set->num_encoders*2; i=i+2)
+  {
+    prev_val = enc_set->prev_word >> i & 0b11;
+    cur_val = cur_word >> i & 0b11; 
+    
+    //log_debug("index",i);
+    //log_debug("value",cur_val,BIN); 
+   
+    if (cur_val == prev_val)
+    {
+      // do nothing. no change
+    } 
+    // encoder has been turned clockwise
+    else if 
+        ((prev_val == 0b00 && cur_val == 0b01) ||
+	(prev_val == 0b01 && cur_val == 0b11)  ||
+	(prev_val == 0b11 && cur_val == 0b10)  ||
+        (prev_val == 0b10 && cur_val == 0b00))
+    {
+       // increment the interpreted encoder value
+       log_debug("cw",i);
+       enc_set->value[i/2]++;  
+    }
+    // encoder has been turned anti-clockwise
+    else if 
+        ((prev_val == 0b00 && cur_val == 0b10) ||
+	(prev_val == 0b10 && cur_val == 0b11)  ||
+	(prev_val == 0b11 && cur_val == 0b01)  ||
+        (prev_val == 0b01 && cur_val == 0b00))
+    {
+       // increment the interpreted encoder value
+       log_debug("ccw",i);
+       enc_set->value[i/2]--;  
+    }
+  } 
+
+  //record the current word for comparison 
+  enc_set->prev_word = cur_word; 
 }
+
 
 //read, recalibrate, and store the current value of an analog input  
 void read_analog_in(int index)

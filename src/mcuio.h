@@ -51,7 +51,7 @@ struct encoder_set
 {
   struct digital_mux *mux;
   unsigned char prev_word;
-  unsigned char value[8];
+  signed char value[8];
   unsigned char mcu_input_pin_index;
   unsigned char num_encoders;
 };
