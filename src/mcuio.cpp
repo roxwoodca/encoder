@@ -154,7 +154,8 @@ void scan_mux(digital_mux *mux)
     digitalWrite(mux->select_pin[0], i & 0x1);
     digitalWrite(mux->select_pin[1], (i>>1) & 0x1);
     digitalWrite(mux->select_pin[2], (i>>2) & 0x1);
-   
+  
+    // so in fact i think we can read these bits in parallel to save cpu 
     // each set of mux bits is stored in a byte
     for(j=0; j < mux->num_outs; j++)
     {
@@ -164,8 +165,7 @@ void scan_mux(digital_mux *mux)
   }
 }
 
-// so this will probably be a lot of bitwise stuff i suppose
-// we're going to be comparing encoder values in pairs to their previous value
+// compare encoder values in pairs to their previous value
 void process_encoder_data(encoder_set *enc_set)
 {
   // get current mux word
@@ -183,13 +183,20 @@ void process_encoder_data(encoder_set *enc_set)
   {
     prev_val = enc_set->prev_word >> i & 0b11;
     cur_val = cur_word >> i & 0b11; 
-    
-    //log_debug("index",i);
-    //log_debug("value",cur_val,BIN); 
-   
-    if (cur_val == prev_val)
+
+    //if no values have changed or the previous value stored has not yet expired
+    if (cur_val == prev_val || enc_set->cur_expiry[i/2] < enc_set->expiry_life)
     {
-      // do nothing. no change
+      //decrement the expiry
+      if (enc_set->cur_expiry > 0)
+      {
+        enc_set->cur_expiry[i/2]--;
+      }
+      //unless it is at 0 already, in which case reset the expiry counter
+      else
+      { 
+        enc_set->cur_expiry[i/2] = enc_set->expiry_life;
+      }
     } 
     // encoder has been turned clockwise
     else if 
