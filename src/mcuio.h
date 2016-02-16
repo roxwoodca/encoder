@@ -1,8 +1,8 @@
 #ifndef MCUIO_H
 #define MCUIO_H
 
-#define NUM_DIGITAL_INS (sizeof digital_ins / sizeof digital_ins[0])
-#define NUM_DIGITAL_OUTS (sizeof digital_outs / sizeof digital_outs[0])
+#define NUM_DIGITAL_INS  2
+#define NUM_DIGITAL_OUTS 3
 #define NUM_ANALOG_INS (sizeof analog_ins / sizeof analog_ins[0])
 #define NUM_ANALOG_OUTS (sizeof analog_outs / sizeof analog_outs[0])
 
@@ -10,13 +10,11 @@
 struct digital_in
 {
   const char pin;
-  volatile unsigned char value;
 };
 
 struct digital_out
 {
   const char pin;
-  volatile unsigned char value;
 };
 
 struct analog_in

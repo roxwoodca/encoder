@@ -15,6 +15,9 @@ void setup()
   Serial.begin(9600);
   #endif
 
+  // set I/O direction register
+  DDRB =0x30;
+
   // set pin directions 
   init_pins();
 
@@ -43,10 +46,6 @@ void isr_1()
 {
   #ifdef DEBUG_MODE
 
-  //log_debug("mx1vl1",twddle_mux.value[0],2);
-  //log_debug("mx1vl2",twddle_mux.value[1],2);
-  //log_debug("ana0val",analog_ins[0].value);
-
   log_debug("twddleA",twddle_enc.value[0]); 
   log_debug("twddleB",twddle_enc.value[1]); 
   log_debug("twddleC",twddle_enc.value[2]); 
@@ -65,16 +64,6 @@ void loop()
 void init_pins()
 {
   unsigned int i;
-
-  for (i = 0; i < NUM_DIGITAL_INS; i++)
-  {
-    pinMode(digital_ins[i].pin, INPUT);
-  }
-
-  for (i = 0; i < NUM_DIGITAL_OUTS; i++)
-  {
-    pinMode(digital_outs[i].pin, OUTPUT);
-  }
 
   for (i = 0; i < NUM_ANALOG_INS; i++)
   {
@@ -130,13 +119,12 @@ void calibrate_analog_ins()
 /* We are using a single mux object right now, with a 3-bit channel selector. 
  * That 'mux' may be made up of multiple mux ic's each with own output
  * as long as each uses the same channel selector and has the same number of channels .
- * For now we are hard-coded to 2 x 4051 
  * This function steps through the channels of each mux (using the shared channel selector)
  * shifting each bit to the left to eventually read a full byte 
  */
 void scan_mux(digital_mux *mux)
 {
-  unsigned int i, j;
+  unsigned int i, j, cur_bit;
 
   // loop through mux out channels in parallel 
   for(i=0; i < mux->num_channels; i++)
@@ -144,12 +132,13 @@ void scan_mux(digital_mux *mux)
     // use bitmask to modify selector pin bits
     *mux->selector_port |=(i << mux->selector_pin_offset);
    
-    // loop through input ports, shifting to get value of each pin and shifting them onto a byte for each input 
+    // loop through input ports, shifting to get value of each pin
+    //  and shifting them onto a byte for each input 
     for (j=0; j < mux->num_input_pin; j++)
     {
-      mux->value[j] = ((mux->value[j]<<1) | (*mux->input_port >> (mux->input_pin_offset+j)) & 0x01);
+      cur_bit = ((*mux->input_port >> (mux->input_pin_offset+j)) & 0x01);
+      mux->value[j] = ((mux->value[j]<<1) | cur_bit);
     }
-
   }
 }
 
@@ -158,14 +147,7 @@ void process_encoder_data(encoder_set *enc_set)
 {
   // get current mux word
   unsigned char cur_word = enc_set->mux->value[enc_set->mcu_input_pin_index]; 
-
-  // unsigned char cur_bit_a, cur_bit_b, prev_bit_a, prev_bit_b;
-
-  unsigned char prev_val, cur_val;
-
-  unsigned int i;
-
-  // log_debug("word",cur_word,BIN);
+  unsigned char i, prev_val, cur_val;
 
   for(i=0; i < enc_set->num_encoders*2; i=i+2)
   {
@@ -193,7 +175,7 @@ void process_encoder_data(encoder_set *enc_set)
 	(prev_val == 0b11 && cur_val == 0b10)  ||
         (prev_val == 0b10 && cur_val == 0b00))
     {
-       // increment the interpreted encoder value
+       // increment the associated value
        log_debug("cw",i);
        enc_set->value[i/2]++;  
     }
@@ -204,7 +186,7 @@ void process_encoder_data(encoder_set *enc_set)
 	(prev_val == 0b11 && cur_val == 0b01)  ||
         (prev_val == 0b01 && cur_val == 0b00))
     {
-       // increment the interpreted encoder value
+       // decrement the associated value
        log_debug("ccw",i);
        enc_set->value[i/2]--;  
     }
