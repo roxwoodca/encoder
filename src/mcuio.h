@@ -40,9 +40,12 @@ struct analog_out
 struct digital_mux
 {
   unsigned char num_channels; 
-  unsigned char num_outs;
-  unsigned char select_pin[3]; 
-  unsigned char mcu_input_pin[2]; 
+  volatile unsigned char* selector_port; 
+  unsigned char selector_pin_offset;
+  unsigned char num_selector_pin;
+  volatile unsigned char* input_port; 
+  unsigned char input_pin_offset;
+  unsigned char num_input_pin;
   unsigned char value[2];
 };
 

@@ -136,32 +136,20 @@ void calibrate_analog_ins()
  */
 void scan_mux(digital_mux *mux)
 {
-  // some local variables to store individual bits
-  int cur_bit;
-
-  unsigned int i,j;
-
-  // zero out the mux values or else we get some crazy shit happening
-  for(j=0; j < mux->num_outs; j++)
-  {
-    mux->value[j] = 0;
-  }
+  unsigned int i, j;
 
   // loop through mux out channels in parallel 
   for(i=0; i < mux->num_channels; i++)
   {
-    // shift required bit i places right to LSB position and use bitwise and to identify it's value
-    digitalWrite(mux->select_pin[0], i & 0x1);
-    digitalWrite(mux->select_pin[1], (i>>1) & 0x1);
-    digitalWrite(mux->select_pin[2], (i>>2) & 0x1);
-  
-    // so in fact i think we can read these bits in parallel to save cpu 
-    // each set of mux bits is stored in a byte
-    for(j=0; j < mux->num_outs; j++)
+    // use bitmask to modify selector pin bits
+    *mux->selector_port |=(i << mux->selector_pin_offset);
+   
+    // loop through input ports, shifting to get value of each pin and shifting them onto a byte for each input 
+    for (j=0; j < mux->num_input_pin; j++)
     {
-      cur_bit = digitalRead(mux->mcu_input_pin[j]);
-      mux->value[j] = (mux->value[j]<<1) | cur_bit;
+      mux->value[j] = ((mux->value[j]<<1) | (*mux->input_port >> (mux->input_pin_offset+j)) & 0x01);
     }
+
   }
 }
 
