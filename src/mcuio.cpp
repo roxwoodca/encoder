@@ -16,7 +16,7 @@ void setup()
   #endif
 
   // set I/O direction register
-  DDRB =0x30;
+  DDRB =0x0E;
 
   // set pin directions 
   init_pins();
@@ -45,7 +45,8 @@ void isr_0()
 void isr_1()
 {
   #ifdef DEBUG_MODE
-
+  
+  
   log_debug("twddleA",twddle_enc.value[0]); 
   log_debug("twddleB",twddle_enc.value[1]); 
   log_debug("twddleC",twddle_enc.value[2]); 
@@ -124,22 +125,30 @@ void calibrate_analog_ins()
  */
 void scan_mux(digital_mux *mux)
 {
-  unsigned int i, j, cur_bit;
+  unsigned int i, j, bit_mask, zero_mask, cur_bit;
 
   // loop through mux out channels in parallel 
   for(i=0; i < mux->num_channels; i++)
   {
     // use bitmask to modify selector pin bits
-    *mux->selector_port |=(i << mux->selector_pin_offset);
-   
+    // we need to blank out the pins which do not concern us
+    bit_mask = (i << mux->selector_pin_offset); 
+    zero_mask = 0 | ~(((1 << mux->num_selector_pin)-1) << mux->selector_pin_offset);
+    log_debug("0mask",zero_mask,BIN);
+    log_debug("1mask",bit_mask,BIN);
+    *mux->selector_port &= zero_mask;
+    *mux->selector_port |= bit_mask;
+    log_debug("PORTB",PORTB,BIN); 
     // loop through input ports, shifting to get value of each pin
     //  and shifting them onto a byte for each input 
     for (j=0; j < mux->num_input_pin; j++)
     {
       cur_bit = ((*mux->input_port >> (mux->input_pin_offset+j)) & 0x01);
       mux->value[j] = ((mux->value[j]<<1) | cur_bit);
+      //log_debug("foo",cur_bit);
     }
   }
+  //log_debug("mux1",mux->value[0],BIN);
 }
 
 // compare encoder values in pairs to their previous value
