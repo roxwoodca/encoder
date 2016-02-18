@@ -26,7 +26,7 @@ void setup()
 void isr_0()
 {
   scan_mux(&twddle_mux);
-  process_encoder_data(&twddle_enc);
+  read_encoders(&twddle_enc);
 }
 
 /* 1Hz */
@@ -68,7 +68,7 @@ void scan_mux(digital_mux *mux)
 }
 
 // compare encoder values in pairs to their previous value
-void process_encoder_data(encoder_set *enc_set)
+void read_encoders(encoder_set *enc_set)
 {
   // get current mux word
   unsigned char cur_word = enc_set->mux->value[enc_set->mcu_input_pin_index]; 

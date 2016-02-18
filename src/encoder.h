@@ -32,6 +32,6 @@ struct encoder_set
 
 // function prototypes
 void scan_mux(digital_mux *mux);
-void process_encoder_data(encoder_set *twddle_enc);
+void read_encoders(encoder_set *twddle_enc);
 
 #endif /* MCUIO_H */
