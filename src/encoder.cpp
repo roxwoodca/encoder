@@ -49,11 +49,12 @@ void scan_mux(digital_mux *mux)
   // loop through mux out channels in parallel 
   for(i=0; i < mux->num_channels; i++)
   {
-    // use bitmask to modify selector pin bits
-    // we need to blank out the pins which do not concern us
-    bit_mask = (i << mux->selector_pin_offset); 
+    // zero out selector out pins 
     zero_mask = 0 | ~(((1 << mux->num_selector_pin)-1) << mux->selector_pin_offset);
     *mux->selector_port &= zero_mask;
+
+    // write current channel number into selector 
+    bit_mask = (i << mux->selector_pin_offset); 
     *mux->selector_port |= bit_mask;
 
     // loop through input ports, shifting to get value of each pin
