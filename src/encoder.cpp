@@ -6,8 +6,8 @@
 #include "debug.h"
 #endif
 
-digital_mux twddle_mux = { 8, &PORTB, 1, 3, &PORTB, 5, 2, { 0, 0 } };
-encoder_set twddle_enc = { &twddle_mux, 0, { 0 }, 1, 4, { 16 }, 16 };
+digital_mux twddle_mux = { 8, &PORTB, 1, 3, &PINB, 5, 2, { 0, 0 } };
+encoder_set twddle_enc = { &twddle_mux, 0, { 0 }, 0, 4, { 16 }, 0 };
 
 // the setup routine runs once when you press reset:
 void setup() 
@@ -33,6 +33,10 @@ void isr_0()
 void isr_1()
 {
   #ifdef DEBUG_MODE
+  log_debug("enc1",twddle_enc.value[0]);
+  log_debug("enc2",twddle_enc.value[1]);
+  log_debug("enc3",twddle_enc.value[2]);
+  log_debug("enc4",twddle_enc.value[3]);
   dump_debugs();
   #endif
 }
@@ -65,6 +69,10 @@ void scan_mux(digital_mux *mux)
       mux->value[j] = ((mux->value[j]<<1) | cur_bit);
     }
   }
+  #ifdef DEBUG_MODE
+  //log_debug("mux1",mux->value[0],BIN);
+  //log_debug("mux2",mux->value[1],BIN);
+  #endif
 }
 
 // compare encoder values in pairs to their previous value
@@ -74,23 +82,24 @@ void read_encoders(encoder_set *enc_set)
   unsigned char cur_word = enc_set->mux->value[enc_set->mcu_input_pin_index]; 
   unsigned char i, prev_val, cur_val;
 
+  
+
   for(i=0; i < enc_set->num_encoders*2; i=i+2)
   {
     prev_val = enc_set->prev_word >> i & 0b11;
     cur_val = cur_word >> i & 0b11; 
-
+/*
+    log_debug("enc",i);
+    log_debug("prev",prev_val,BIN);
+    log_debug("cur",cur_val,BIN);
+*/
     //if no values have changed or the previous value stored has not yet expired
-    if (cur_val == prev_val || enc_set->cur_expiry[i/2] < enc_set->expiry_life)
+    if (cur_val == prev_val || enc_set->cur_expiry[i/2] > 0)
     {
       //decrement the expiry
-      if (enc_set->cur_expiry > 0)
+      if (enc_set->cur_expiry[i/2] > 0)
       {
         enc_set->cur_expiry[i/2]--;
-      }
-      //unless it is at 0 already, in which case reset the expiry counter
-      else
-      { 
-        enc_set->cur_expiry[i/2] = enc_set->expiry_life;
       }
     } 
     // encoder has been turned clockwise
@@ -101,8 +110,8 @@ void read_encoders(encoder_set *enc_set)
         (prev_val == 0b10 && cur_val == 0b00))
     {
        // increment the associated value
-       log_debug("cw",i);
        enc_set->value[i/2]++;  
+       enc_set->cur_expiry[i/2] = enc_set->expiry_life;
     }
     // encoder has been turned anti-clockwise
     else if 
@@ -112,8 +121,8 @@ void read_encoders(encoder_set *enc_set)
         (prev_val == 0b01 && cur_val == 0b00))
     {
        // decrement the associated value
-       log_debug("ccw",i);
        enc_set->value[i/2]--;  
+       enc_set->cur_expiry[i/2] = enc_set->expiry_life;
     }
   } 
 

@@ -1,5 +1,6 @@
 #ifndef DEBUG_H
 #define DEBUG_H
+#define DEBUG_LOG_SIZE 24
 unsigned int num_unread_debugs = 0;
 void log_debug(char message[], int value);
 void dump_debugs();
@@ -10,11 +11,11 @@ struct debug
    char message[8]; 
    int  value;
    char base;
-} debug_log[64];
+} debug_log[DEBUG_LOG_SIZE];
 
 void log_debug(const char* message, int value, char base=10)
 {
-  if (num_unread_debugs < 64)
+  if (num_unread_debugs < DEBUG_LOG_SIZE)
   {
     debug newdebug; 
     strcpy(newdebug.message,message);
@@ -41,7 +42,6 @@ void dump_debugs()
     }
     Serial.print("\n");
   }
-  //Serial.print("\n");
   num_unread_debugs = 0;
 
 }

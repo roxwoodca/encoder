@@ -26,8 +26,8 @@ struct encoder_set
   signed char value[8];
   unsigned char mcu_input_pin_index;
   unsigned char num_encoders;
-  unsigned char cur_expiry[8];
-  unsigned char expiry_life;
+  signed int cur_expiry[8];
+  unsigned int expiry_life;
 };
 
 // function prototypes
