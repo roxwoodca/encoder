@@ -7,7 +7,7 @@
 #endif
 
 digital_mux twddle_mux = { 8, &PORTB, 1, 3, &PINB, 5, 2, { 0, 0 } };
-encoder_set twddle_enc = { &twddle_mux, 0, { 0 }, 0, 4, { 16 }, 0 };
+encoder_set twddle_enc = { &twddle_mux, 0, { 0 }, 0, 4 };
 
 // the setup routine runs once when you press reset:
 void setup() 
@@ -88,22 +88,9 @@ void read_encoders(encoder_set *enc_set)
   {
     prev_val = enc_set->prev_word >> i & 0b11;
     cur_val = cur_word >> i & 0b11; 
-/*
-    log_debug("enc",i);
-    log_debug("prev",prev_val,BIN);
-    log_debug("cur",cur_val,BIN);
-*/
-    //if no values have changed or the previous value stored has not yet expired
-    if (cur_val == prev_val || enc_set->cur_expiry[i/2] > 0)
-    {
-      //decrement the expiry
-      if (enc_set->cur_expiry[i/2] > 0)
-      {
-        enc_set->cur_expiry[i/2]--;
-      }
-    } 
+
     // encoder has been turned clockwise
-    else if 
+    if 
         ((prev_val == 0b00 && cur_val == 0b01) ||
 	(prev_val == 0b01 && cur_val == 0b11)  ||
 	(prev_val == 0b11 && cur_val == 0b10)  ||
@@ -111,7 +98,6 @@ void read_encoders(encoder_set *enc_set)
     {
        // increment the associated value
        enc_set->value[i/2]++;  
-       enc_set->cur_expiry[i/2] = enc_set->expiry_life;
     }
     // encoder has been turned anti-clockwise
     else if 
@@ -122,7 +108,6 @@ void read_encoders(encoder_set *enc_set)
     {
        // decrement the associated value
        enc_set->value[i/2]--;  
-       enc_set->cur_expiry[i/2] = enc_set->expiry_life;
     }
   } 
 
