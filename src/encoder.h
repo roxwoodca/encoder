@@ -1,9 +1,6 @@
 #ifndef MCUIO_H
 #define MCUIO_H
 
-#define NUM_DIGITAL_INS  2
-#define NUM_DIGITAL_OUTS 3
-
 // # of mux outputs is hardcoded to 2. need to find a way to make this flexible
 // without taking up unnecessary sdram
 struct digital_mux
@@ -33,8 +30,6 @@ struct encoder_set
 
 // function prototypes
 void scan_mux(digital_mux *mux);
-void read_encoders(encoder_set *twddle_enc);
 void read_encoders(encoder_set *twddle_enc,void (*event_ptr)(int));
-void do_midi_thing(int value);
 
 #endif /* MCUIO_H */
