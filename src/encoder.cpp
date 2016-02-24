@@ -2,12 +2,13 @@
 #include "interrupts.h"
 #include "encoder.h"
 
+
 #ifdef DEBUG_MODE
 #include "debug.h"
 #endif
 
 digital_mux twddle_mux = { 8, &PORTB, 1, 3, &PINB, 5, 2, { 0, 0 } };
-encoder_set twddle_enc = { &twddle_mux, 0, { 0 }, 0, 4 };
+encoder_set twddle_enc = { &twddle_mux, 0, { 0 }, 0, 4, 0, 127 };
 
 // the setup routine runs once when you press reset:
 void setup() 
@@ -26,8 +27,14 @@ void setup()
 void isr_0()
 {
   scan_mux(&twddle_mux);
-  read_encoders(&twddle_enc);
+  read_encoders(&twddle_enc,do_midi_thing);
 }
+
+void do_midi_thing(int value)
+{
+
+}
+
 
 /* 1Hz */
 void isr_1()
@@ -76,13 +83,11 @@ void scan_mux(digital_mux *mux)
 }
 
 // compare encoder values in pairs to their previous value
-void read_encoders(encoder_set *enc_set)
+void read_encoders(encoder_set *enc_set,void (*event_ptr)(int))
 {
   // get current mux word
   unsigned char cur_word = enc_set->mux->value[enc_set->mcu_input_pin_index]; 
   unsigned char i, prev_val, cur_val;
-
-  
 
   for(i=0; i < enc_set->num_encoders*2; i=i+2)
   {
@@ -97,7 +102,10 @@ void read_encoders(encoder_set *enc_set)
         (prev_val == 0b10 && cur_val == 0b00))
     {
        // increment the associated value
-       enc_set->value[i/2]++;  
+       if (enc_set->value[i/2] < enc_set->max_value)
+       {
+         enc_set->value[i/2]++;  
+       }
     }
     // encoder has been turned anti-clockwise
     else if 
@@ -107,7 +115,10 @@ void read_encoders(encoder_set *enc_set)
         (prev_val == 0b01 && cur_val == 0b00))
     {
        // decrement the associated value
-       enc_set->value[i/2]--;  
+       if (enc_set->value[i/2] > enc_set->min_value)
+       {
+         enc_set->value[i/2]--;  
+       }
     }
   } 
 
