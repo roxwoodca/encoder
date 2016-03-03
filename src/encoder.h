@@ -1,5 +1,10 @@
-#ifndef MCUIO_H
-#define MCUIO_H
+#ifndef ENCODER_H
+#define ENCODER_H
+
+#ifdef DEBUG_MODE
+#include "Arduino.h"
+#include "debug.h"
+#endif
 
 // # of mux outputs is hardcoded to 2. need to find a way to make this flexible
 // without taking up unnecessary sdram
