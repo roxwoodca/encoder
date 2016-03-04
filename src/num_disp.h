@@ -23,8 +23,9 @@ struct numeric_display
 
 // function prototypes
 void num_disp_write(int val, numeric_display *disp);
-void num_disp_write_cur_digit(numeric_display *disp);
+void num_disp_write_digit(numeric_display *disp, unsigned char);
 void num_disp_enable_cur_digit(numeric_display *disp);
-char get_decimal_column(unsigned int val, char digit_offset);
+unsigned char * to_bcd(unsigned char);
+long int x_to_the_n(int ,int );
 
 #endif /* NUMDISP_H */

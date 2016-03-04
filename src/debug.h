@@ -11,6 +11,7 @@ struct debug
    char message[8]; 
    int  value;
    char base;
-}extern debug_log[DEBUG_LOG_SIZE];
+};
+//}extern debug_log[DEBUG_LOG_SIZE];
 
 #endif /* DEBUG_H */
