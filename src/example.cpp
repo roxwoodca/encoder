@@ -9,7 +9,7 @@
 
 digital_mux   twddle_mux   = { 8, &PORTD, 5, 3, &PINB, 4, 2, { 0, 0 } };
 encoder_set   twddle_enc   = { &twddle_mux, 0, { 0 }, 1, 4, 0, 127 };
-numeric_display twddle_num_disp = { 3, &PORTB, 0, 4, &PORTD, 2, 0, 0, 2048, 0 }; 
+numeric_display twddle_num_disp = { 3, &PORTB, 0, 4, &PORTD, 2, 0, 0, 32, 0 }; 
 
 void do_midi_thing(int value);
 
@@ -24,6 +24,7 @@ void setup()
   DDRB =0x0F;
   DDRD =0xFE;
   init_interrupts_uno();
+ 
 }
 
 void loop() { }
@@ -33,8 +34,8 @@ void isr_0()
 {
   scan_mux(&twddle_mux);
   read_encoders(&twddle_enc,do_midi_thing);
-  //num_disp_write(twddle_enc.value[0],&twddle_num_disp);
-  num_disp_write(124,&twddle_num_disp);
+  num_disp_write(twddle_enc.value[0],&twddle_num_disp);
+  //num_disp_write(124,&twddle_num_disp);
 }
 
 void do_midi_thing(int value)

@@ -20,7 +20,7 @@ void init_interrupts_uno()
   //OCR0A = 255;// = (16*10^6) / (1000*64) - 1 (must be <256)
 
   // 4Khz
-  OCR0A = 63;// = (16*10^6) / (1000*64) - 1 (must be <256)
+  OCR0A = 63;// = (16*10^6) / (4000*64) - 1 (must be <256)
 
   // turn on CTC mode
   TCCR0A |= (1 << WGM01);

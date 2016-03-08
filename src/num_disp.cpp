@@ -64,19 +64,21 @@ void num_disp_write_digit(numeric_display *disp, unsigned char digit)
 
   // create a mask to switch on the right pins
   unsigned char bit_mask = (digit << disp->ctr_pin_offset);
-  log_debug("mask",bit_mask,BIN); 
+  //log_debug("mask",bit_mask,BIN); 
   *disp->ctr_port |= bit_mask;
 }
 
 void num_disp_enable_cur_digit(numeric_display *disp)
 {
-  // zero out strobe pins 
-  unsigned char zero_mask = 0 | ~(((1 << disp->num_digits)-1) << disp->strb_pin_offset);
-  *disp->strb_port &= zero_mask;
+  //disp->cur_digit=0;
+  // disable all displays
+  unsigned char reset_mask = 0 | (((1 << disp->num_digits)-1) << disp->strb_pin_offset);
+  *disp->strb_port |= reset_mask;
  
-  // create a mask to switch on the required digit
-  unsigned char bit_mask = 1 << (disp->strb_pin_offset + disp->cur_digit);
-  *disp->strb_port |= bit_mask;
+  // create a mask to enable the current display (with a low signal)
+  unsigned char bit_mask = ~(1 << (disp->strb_pin_offset + disp->cur_digit));
+  //log_debug("mask",bit_mask, BIN);
+  *disp->strb_port &= bit_mask;
 }
 
 
