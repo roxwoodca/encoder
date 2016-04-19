@@ -30,7 +30,7 @@ struct encoder_set
   unsigned char num_encoders;
   unsigned char min_value;
   unsigned char max_value;
-  
+  unsigned char cur_encoder;  
 };
 
 // function prototypes

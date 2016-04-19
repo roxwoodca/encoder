@@ -56,6 +56,7 @@ void read_encoders(encoder_set *enc_set,void (*event_ptr)(int))
        {
          enc_set->value[i/2]++;  
        }
+       enc_set->cur_encoder = i/2;
     }
     // encoder has been turned anti-clockwise
     else if 
@@ -69,6 +70,7 @@ void read_encoders(encoder_set *enc_set,void (*event_ptr)(int))
        {
          enc_set->value[i/2]--;  
        }
+       enc_set->cur_encoder = i/2;
     }
   } 
 
