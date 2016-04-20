@@ -25,16 +25,33 @@ struct encoder_set
 {
   struct digital_mux *mux;
   unsigned char prev_word;
-  signed int value[8];
+  signed int value[4][4];
   unsigned char mcu_input_pin_index;
   unsigned char num_encoders;
   unsigned char min_value;
   unsigned char max_value;
   unsigned char cur_encoder;  
+  unsigned char cur_bank;
 };
+
+struct momentary_set
+{
+  struct digital_mux *mux;
+  unsigned char prev_word;
+  unsigned char mcu_input_pin_index;
+  unsigned char num_switches;
+  void (*on_switch_down)(char);
+  void (*on_switch_up)(char);
+  void (*on_single_click)(char);
+  void (*on_double_click)(char);
+  unsigned char sensitivity; 
+  unsigned char bit_offset;
+};
+
 
 // function prototypes
 void scan_mux(digital_mux *mux);
 void read_encoders(encoder_set *twddle_enc,void (*event_ptr)(int));
+void read_momentary_switches(momentary_set *twddle_mom);
 
 #endif /* MCUIO_H */

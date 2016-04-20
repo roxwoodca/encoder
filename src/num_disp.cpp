@@ -57,9 +57,9 @@ void num_disp_write_digit(numeric_display *disp, unsigned char digit)
   *disp->ctr_port &= zero_mask;
 
   #ifdef DEBUG_MODE
-  log_debug("val",disp->value,10);
-  log_debug("dig_indx",disp->cur_digit,10);
-  log_debug("digit",digit,10); 
+  //log_debug("val",disp->value,10);
+  //log_debug("dig_indx",disp->cur_digit,10);
+  //log_debug("digit",digit,10); 
   #endif
 
   // create a mask to switch on the right pins

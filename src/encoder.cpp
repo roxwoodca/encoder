@@ -52,9 +52,9 @@ void read_encoders(encoder_set *enc_set,void (*event_ptr)(int))
         (prev_val == 0b10 && cur_val == 0b00))
     {
        // increment the associated value
-       if (enc_set->value[i/2] < enc_set->max_value)
+       if (enc_set->value[0][i/2] < enc_set->max_value)
        {
-         enc_set->value[i/2]++;  
+         enc_set->value[0][i/2]++;  
        }
        enc_set->cur_encoder = i/2;
     }
@@ -66,9 +66,9 @@ void read_encoders(encoder_set *enc_set,void (*event_ptr)(int))
         (prev_val == 0b01 && cur_val == 0b00))
     {
        // decrement the associated value
-       if (enc_set->value[i/2] > enc_set->min_value)
+       if (enc_set->value[0][i/2] > enc_set->min_value)
        {
-         enc_set->value[i/2]--;  
+         enc_set->value[0][i/2]--;  
        }
        enc_set->cur_encoder = i/2;
     }
@@ -76,4 +76,30 @@ void read_encoders(encoder_set *enc_set,void (*event_ptr)(int))
 
   //record the current word for comparison 
   enc_set->prev_word = cur_word; 
+}
+
+void read_momentary_switches(momentary_set *mom_set)
+{
+  // get current mux word
+  unsigned char cur_word = mom_set->mux->value[mom_set->mcu_input_pin_index]; 
+  unsigned char i, prev_val, cur_val;
+  
+  for (i= mom_set->bit_offset; i < mom_set->num_switches+mom_set->bit_offset; i++)
+  {
+    prev_val = mom_set->prev_word >> i & 1;
+    cur_val = cur_word >> i & 1;
+
+    if (cur_val > prev_val) 
+    {
+      log_debug("on",1,DEC);
+      (*mom_set->on_switch_down)(i);
+    }
+
+    if (cur_val < prev_val)
+    {
+      //this one is not firing
+      log_debug("off",1,DEC);
+      (*mom_set->on_switch_up)(i);
+    }
+  } 
 }

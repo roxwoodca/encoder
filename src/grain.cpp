@@ -70,6 +70,6 @@ void grain_signal(grain_synth *synth)
   PWM_VALUE = output;
   
   #ifdef DEBUG_MODE
-  log_debug("PWM_VAL",output,DEC);
+  //log_debug("PWM_VAL",output,DEC);
   #endif
 }
