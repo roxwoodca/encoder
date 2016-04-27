@@ -44,10 +44,17 @@ struct momentary_set
   void (*on_switch_up)(char);
   void (*on_single_click)(char);
   void (*on_double_click)(char);
-  unsigned char sensitivity; 
+  void (*on_long_closed)(char);
   unsigned char bit_offset;
+  unsigned expiry_time;
+  struct momentary_session *session;
 };
 
+struct momentary_session
+{
+  unsigned char status[4];
+  unsigned int  expiry[4];
+};
 
 // function prototypes
 void scan_mux(digital_mux *mux);

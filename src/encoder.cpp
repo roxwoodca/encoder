@@ -83,23 +83,91 @@ void read_momentary_switches(momentary_set *mom_set)
   // get current mux word
   unsigned char cur_word = mom_set->mux->value[mom_set->mcu_input_pin_index]; 
   unsigned char i, prev_val, cur_val;
-  
-  for (i= mom_set->bit_offset; i < mom_set->num_switches+mom_set->bit_offset; i++)
-  {
-    prev_val = mom_set->prev_word >> i & 1;
-    cur_val = cur_word >> i & 1;
 
+  // loop through bits
+  for (i=0; i < mom_set->num_switches; i++)
+  {
+    //update our local variables
+    prev_val = mom_set->prev_word >> (i+mom_set->bit_offset) & 1;
+    cur_val = cur_word >> (i+mom_set->bit_offset) & 1;
+
+    // if switch has been closed
     if (cur_val > prev_val) 
     {
-      log_debug("on",1,DEC);
-      (*mom_set->on_switch_down)(i);
-    }
+      // fire on_switch_down event
+      (mom_set->on_switch_down)(i);
+     
+      // if status is already at level 2, increment status to level 3 
+      if (mom_set->session->status[i] == 2)
+      {
+        (mom_set->session->status[i])++;
+        (mom_set->session->expiry[i]) = mom_set->expiry_time;
+      }
+      // record 1st switch-on transition 
+      else if (mom_set->session->status[i] == 0)
+      {
+        (mom_set->session->status[i])++;
 
+        // start countdown expiry
+        (mom_set->session->expiry[i]) = mom_set->expiry_time; 
+      }
+    }
+    
+    // if switch has been opened
     if (cur_val < prev_val)
     {
-      //this one is not firing
-      log_debug("off",1,DEC);
-      (*mom_set->on_switch_up)(i);
+      // fire on_switch_up event
+      (mom_set->on_switch_up)(i);
+
+      // if switch was closed on the previous iteration (status 1)
+      // fire a single click event and increment the status to 2
+      if (mom_set->session->status[i] == 1)
+      {
+        // if we haven't timed out then increment status
+        if (mom_set->session->expiry[i] > 0)
+        {
+          //fire single click event
+          (mom_set->on_single_click)(i);
+          (mom_set->session->status[i])++;
+        }
+        else
+        {
+          (mom_set->on_long_closed)(i);
+
+          // reset status back to zero
+          mom_set->session->status[i] = 0;
+        }
+      }
+      else if (mom_set->session->status[i] == 3)
+      {
+        // fire on_switch_up event
+        (mom_set->on_switch_up)(i);
+
+        // fire double click event
+        if (mom_set->session->expiry > 0)
+        {
+          (mom_set->on_double_click)(i);
+        }
+
+        // reset status back to zero
+        mom_set->session->status[i] = 0;
+
+        // force expiry to zero;
+        mom_set->session->expiry[i] = 0;
+      }
+    }
+
+    // if the countdown has not yet expired then decrement 
+    if (mom_set->session->expiry[i] > 0)
+    {
+      (mom_set->session->expiry[i])--;
+    } 
+    
+    // if the session is expired and the switch is open then reset status to zero 
+    if (cur_val == 0 && mom_set->session->expiry[i] == 0)
+    {
+      mom_set->session->status[i] = 0;
     }
   } 
+  mom_set->prev_word = cur_word;
 }
