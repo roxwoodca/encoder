@@ -37,12 +37,12 @@ void num_disp_write(int val, numeric_display *disp)
   disp->cur_expiry = disp->expiry_time;
  
   // if there are still digits to go 
-  // then increment to next column and reset the expiry
+  // then increment to next column
   if ((disp->cur_digit+1) < disp->num_digits)
   { 
     disp->cur_digit++;
   }
-  // or reset to 1s and restart the expiry timer
+  // or reset back to the ones column
   else
   {
     disp->cur_digit=0;
@@ -74,13 +74,36 @@ void num_disp_enable_cur_digit(numeric_display *disp)
   // disable all displays
   unsigned char reset_mask = 0 | (((1 << disp->num_digits)-1) << disp->strb_pin_offset);
   *disp->strb_port |= reset_mask;
- 
-  // create a mask to enable the current display (with a low signal)
-  unsigned char bit_mask = ~(1 << (disp->strb_pin_offset + disp->cur_digit));
-  //log_debug("mask",bit_mask, BIN);
-  *disp->strb_port &= bit_mask;
+
+  if (disp->disable == 0)
+  { 
+    // create a mask to enable the current display (with a low signal)
+    unsigned char bit_mask = ~(1 << (disp->strb_pin_offset + disp->cur_digit));
+    //log_debug("mask",bit_mask, BIN);
+    *disp->strb_port &= bit_mask;
+  }
 }
 
+void num_disp_flash(numeric_display *disp)
+{
+  static char on = 0;
+
+  if (on == 0)
+  {
+    // create a mask to enable the current display (with a low signal)
+    unsigned char bit_mask = ~(1 << (disp->strb_pin_offset + disp->cur_digit));
+    *disp->strb_port &= bit_mask;
+    disp->disable = 0;
+    on = 1;
+  }
+  else
+  {
+    // disable all displays
+    disp->disable = 1;
+    on = 0;
+  }
+
+}
 
 unsigned char * to_bcd(unsigned char input)
 {
