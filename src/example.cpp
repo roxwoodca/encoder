@@ -35,6 +35,9 @@ void mom_on_action(char switch_index)
   log_debug("swclsd",1,DEC);
   #endif
 
+  // set cur encoder
+  twddle_enc.cur_encoder = switch_index;
+
   // Start strobe effect
   twddle_num_disp.is_flashing = 1;
 }
