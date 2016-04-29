@@ -69,6 +69,7 @@ void mom_double_click(char switch_index)
   #endif
 
   // Switch to parameter bank: switch_index
+  set_cur_bank(&twddle_enc, switch_index);
 }
 
 void mom_long_closed(char switch_index)
@@ -104,7 +105,7 @@ void isr_0()
   scan_mux(&twddle_mux);
   read_encoders(&twddle_enc,do_midi_thing);
   read_momentary_switches(&twddle_mom);
-  num_disp_write(twddle_enc.value[0][twddle_enc.cur_encoder],&twddle_num_disp);
+  num_disp_write(twddle_enc.value[twddle_enc.cur_bank][twddle_enc.cur_encoder],&twddle_num_disp);
 
   cereal_killer.sync_phase_inc=twddle_enc.value[0][0]*100;
   cereal_killer.grain_phase_inc=twddle_enc.value[0][1]*100;

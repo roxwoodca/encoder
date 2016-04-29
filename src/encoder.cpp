@@ -32,6 +32,11 @@ void scan_mux(digital_mux *mux)
   #endif
 }
 
+void set_cur_bank(encoder_set *enc_set, char index)
+{
+  enc_set->cur_bank = index;
+}
+
 // compare encoder values in pairs to their previous value
 void read_encoders(encoder_set *enc_set,void (*event_ptr)(int))
 {
@@ -52,9 +57,9 @@ void read_encoders(encoder_set *enc_set,void (*event_ptr)(int))
         (prev_val == 0b10 && cur_val == 0b00))
     {
        // increment the associated value
-       if (enc_set->value[0][i/2] < enc_set->max_value)
+       if (enc_set->value[enc_set->cur_bank][i/2] < enc_set->max_value)
        {
-         enc_set->value[0][i/2]++;  
+         enc_set->value[enc_set->cur_bank][i/2]++;  
        }
        enc_set->cur_encoder = i/2;
     }
@@ -66,9 +71,9 @@ void read_encoders(encoder_set *enc_set,void (*event_ptr)(int))
         (prev_val == 0b01 && cur_val == 0b00))
     {
        // decrement the associated value
-       if (enc_set->value[0][i/2] > enc_set->min_value)
+       if (enc_set->value[enc_set->cur_bank][i/2] > enc_set->min_value)
        {
-         enc_set->value[0][i/2]--;  
+         enc_set->value[enc_set->cur_bank][i/2]--;  
        }
        enc_set->cur_encoder = i/2;
     }

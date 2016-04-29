@@ -60,5 +60,6 @@ struct momentary_session
 void scan_mux(digital_mux *mux);
 void read_encoders(encoder_set *twddle_enc,void (*event_ptr)(int));
 void read_momentary_switches(momentary_set *twddle_mom);
+void set_cur_bank(encoder_set *enc_set, char index);
 
 #endif /* MCUIO_H */
