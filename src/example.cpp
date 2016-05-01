@@ -3,6 +3,7 @@
 #include "encoder.h"
 #include "num_disp.h"
 #include "grain.h"
+#include "EEPROMex.h"
 
 #ifdef DEBUG_MODE
 #include "debug.h"
@@ -20,7 +21,7 @@ momentary_session  mom_session  = { { }, { } };
 momentary_set twddle_mom   =      { &twddle_mux, 0, 0, 4, mom_on_action, mom_off_action, mom_single_click, mom_double_click, mom_long_closed, 4, 1000, &mom_session }; 
 numeric_display twddle_num_disp = { 3, &PORTB, 0, 4, &PORTC, 0, 0, 0, 32, 0, 0 }; 
 grain_synth cereal_killer =       { 0, 8195, 0, 0, 8195, 4367, 32766, 16383, 0, 0 };
-
+ 
 void do_midi_thing(int value);
 
 void do_midi_thing(int value)
@@ -95,6 +96,12 @@ void setup()
   init_interrupts_uno();
   pinMode(PWM_PIN,OUTPUT);
  
+  // reserve EEPROM address here?
+
+  // hold down enc 1 to go into save mode, choose patch #, click
+  // hold down enc 2 to go into load mode, choose patch #, click
+  // or vice versa
+  // another encoder for midi channel? sysex dump?
 }
 
 void loop() { }
@@ -111,7 +118,10 @@ void isr_0()
   cereal_killer.grain_phase_inc=twddle_enc.value[0][1]*100;
   cereal_killer.grain2_phase_inc=twddle_enc.value[0][2]*100;
   cereal_killer.grain_amp=twddle_enc.value[0][3]*100;
- 
+  cereal_killer.grain2_amp=twddle_enc.value[1][0]*100;
+  cereal_killer.grain_decay=twddle_enc.value[1][1]*100;
+  cereal_killer.grain2_decay=twddle_enc.value[1][2]*100;
+   
   #ifdef DEBUG_MODE 
   /*
   log_debug("val 0",twddle_enc.value[0][0],DEC);
