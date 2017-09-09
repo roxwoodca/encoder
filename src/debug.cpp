@@ -56,7 +56,7 @@ void dump_debugs()
     Serial.print("\t");
     if (debug_log[i].base == 2)
     {
-      print_binary(debug_log[i].value,8);
+      print_binary(debug_log[i].value,16);
     }
     else
     {

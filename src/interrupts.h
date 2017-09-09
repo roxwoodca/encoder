@@ -77,7 +77,7 @@ void init_interrupts_uno()
   /*
    * OC2B is the output connected to pin 5 of the microprocessor, which correspondsto Arduino’s digital pin 3.
    * OCR2B (Output Compare Register), called PWM_VALUE in Auduino, takes the value of the synthesizer’s output.
-   * What it basically does is counting at a 16MHz speed increment a counter from 0 to 255,
+   * What it basically does is counting at 16MHz increment a counter from 0 to 255,
    * and when it reaches 255 count down again back to 0. When OCR2B is higher than the counter, OC2B is high and viceversa.
    *
    */

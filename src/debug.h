@@ -9,7 +9,7 @@ void log_debug(const char*, int, char);
 struct debug
 {
    char message[8]; 
-   int  value;
+   unsigned int  value;
    char base;
 };
 //}extern debug_log[DEBUG_LOG_SIZE];

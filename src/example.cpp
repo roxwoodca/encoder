@@ -20,7 +20,7 @@ encoder_set   twddle_enc   =      { &twddle_mux, 0, { { 0 }, { 0 }, { 0 }, { 0 }
 momentary_session  mom_session  = { { }, { } }; 
 momentary_set twddle_mom   =      { &twddle_mux, 0, 0, 4, mom_on_action, mom_off_action, mom_single_click, mom_double_click, mom_long_closed, 4, 1000, &mom_session }; 
 numeric_display twddle_num_disp = { 3, &PORTB, 0, 4, &PORTC, 0, 0, 0, 32, 0, 0 }; 
-grain_synth cereal_killer =       { 0, 8195, 0, 0, 8195, 4367, 32766, 16383, 0, 0 };
+/* grain_synth cereal_killer =       { }; */
  
 void do_midi_thing(int value);
 
@@ -114,14 +114,11 @@ void isr_0()
   read_momentary_switches(&twddle_mom);
   num_disp_write(twddle_enc.value[twddle_enc.cur_bank][twddle_enc.cur_encoder],&twddle_num_disp);
 
-  cereal_killer.sync_phase_inc=twddle_enc.value[0][0]*100;
-  cereal_killer.grain_phase_inc=twddle_enc.value[0][1]*100;
-  cereal_killer.grain2_phase_inc=twddle_enc.value[0][2]*100;
-  cereal_killer.grain_amp=twddle_enc.value[0][3]*100;
-  cereal_killer.grain2_amp=twddle_enc.value[1][0]*100;
-  cereal_killer.grain_decay=twddle_enc.value[1][1]*100;
-  cereal_killer.grain2_decay=twddle_enc.value[1][2]*100;
-   
+  //cereal_killer.vco1_inc=twddle_enc.value[0][0];
+
+
+  //cereal_killer.vco2_inc=twddle_enc.value[0][1];
+
   #ifdef DEBUG_MODE 
   /*
   log_debug("val 0",twddle_enc.value[0][0],DEC);
@@ -134,7 +131,7 @@ void isr_0()
 
 void isr_2()
 {
-  grain_signal(&cereal_killer);
+  //grain_signal(&cereal_killer);
 }
 
 /* 1Hz */
